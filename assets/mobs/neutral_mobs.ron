@@ -1,0 +1,24 @@
+(
+    mobs: {
+        "Cow": (
+            base: (
+                mob_type: Cow,
+                health: ( current: 30.0, max: 30.0 ),
+                move_speed: ( speed: 0.8 ),
+            ),
+            name: None,
+            damage: None,
+            mana: None,
+        ),
+        "Wolf": (
+            base: (
+                mob_type: Wolf,
+                health: ( current: 40.0, max: 40.0 ),
+                move_speed: ( speed: 2.0 ),
+            ),
+            name: None,
+            damage: Some(Physical(7.0)),
+            mana: None,
+        ),
+    }
+)

@@ -1,0 +1,4 @@
+(
+    slot_one: Some("Gandalf"),
+    slot_two: Some("Herobrine"),
+)

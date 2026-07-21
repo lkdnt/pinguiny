@@ -1,0 +1,13 @@
+(
+    heroes: {
+        "Gandalf": (
+            base: (
+                health: (current: 100.0, max: 100.0),
+                move_speed: (speed: 2.5),
+                damage: Magic(10.0),
+            ),
+            name: "Gandalf the Grey",
+            mana: Some((current: 120.0, max: 120.0)),
+        )
+    }
+)

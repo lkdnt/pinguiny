@@ -1,0 +1,13 @@
+(
+    heroes: {
+        "Herobrine": (
+            base: (
+                health: (current: 140.0, max: 140.0),
+                move_speed: (speed: 1.6),
+                damage: Physical(14.0),
+            ),
+            name: "Herobrine",
+            mana: None,
+        )
+    }
+)
