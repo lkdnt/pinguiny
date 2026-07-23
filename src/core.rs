@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use serde::Deserialize;
 
+/// BASIC ATTRIBUTES FOR HEROES AND MOBS
 #[derive(Component, Clone, Deserialize)]
 pub struct MoveSpeed {
     pub speed: f32,
