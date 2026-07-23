@@ -155,14 +155,10 @@ fn setup_hex_nav_grid(mut commands: Commands) {
         (2, 1),
         (2, 2),
         (-3, 1),
-        (-3, 2),
         (-3, 3),
         (0, -3),
         (1, -3),
         (2, -3),
-        (-1, 2),
-        (-2, 2),
-        (-3, 2),
     ];
 
     for (q, r) in wall_cells {
