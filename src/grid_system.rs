@@ -2,6 +2,15 @@ use bevy::math::VectorSpace;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 
+pub struct NavigationPlugin;
+
+impl Plugin for NavigationPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_hex_nav_grid)
+            .add_systems(Update, debug_draw_hex_grid);
+    }
+}
+
 /// THIS IS A HEXAGONAL GRID SYSTEM FOR LOGIC NAVIGATION OF ENTITIES EITHER HEROES OR MOBS
 #[derive(Clone, Copy, Debug)]
 pub struct CellData {
@@ -136,17 +145,8 @@ impl HexNavGrid {
     }
 }
 
-pub struct NavigationPlugin;
-
-impl Plugin for NavigationPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_hex_nav_grid)
-            .add_systems(Update, debug_draw_hex_grid);
-    }
-}
-
 fn setup_hex_nav_grid(mut commands: Commands) {
-    let mut grid = HexNavGrid::new(85, 70, 16.0); // radius 10, hex size 32.0
+    let mut grid = HexNavGrid::new(80, 70, 16.0); // radius 10, hex size 32.0
 
     // wall_cells is a list of axial coordinates (q, r) that are not walkable
     let wall_cells = [

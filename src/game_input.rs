@@ -1,4 +1,4 @@
-use crate::core::{CameraPanCommand, CameraZoomCommand};
+use crate::core::{CameraPanCommand, CameraZoomCommand, DebugMode};
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -59,5 +59,13 @@ pub fn translate_camera_input(
         if action_state.pressed(&CameraAction::ZoomIn) {
             zoom_writer.write(CameraZoomCommand { delta: -1.0 });
         }
+    }
+}
+
+/// DEBUG MODE TOGGLE
+pub fn toggle_debug_mode(keyboard: Res<ButtonInput<KeyCode>>, mut debug_mode: ResMut<DebugMode>) {
+    if keyboard.just_pressed(KeyCode::F3) {
+        debug_mode.0 = !debug_mode.0;
+        info!("Debug mode toggled: {}", debug_mode.0);
     }
 }

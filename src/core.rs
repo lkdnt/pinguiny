@@ -38,3 +38,13 @@ pub struct CameraZoomCommand {
     /// because the camera's orthographic projection scale increases when zooming out and decreases when zooming in
     pub delta: f32,
 }
+
+#[derive(Resource)]
+pub struct PanBounds {
+    pub min: Vec2, // minimum x and y coordinates for camera panning
+    pub max: Vec2, // maximum x and y coordinates for camera panning
+}
+
+/// DEBUG MODE STRUCTS
+#[derive(Resource, Default)]
+pub struct DebugMode(pub bool);

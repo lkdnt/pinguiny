@@ -7,29 +7,31 @@ mod hero;
 mod mob;
 mod time_wizard;
 
-use std::{f32, ptr::addr_of_mut};
-
 use avian2d::prelude::*;
-use bevy::prelude::*;
+use bevy::{prelude::*, ui_widgets::MenuAction::Toggle};
 use camera::CameraPlugin2D;
+use core::DebugMode;
+use std::{f32, ptr::addr_of_mut};
 //use game_input::{DummyAction, Player, PlayerWalk, debug_player_walk, player_walks};
+use game_input::toggle_debug_mode;
 use game_state::{Economy, GameState, WaveState};
 use grid_system::{HexNavGrid, NavigationPlugin};
-use leafwing_input_manager::prelude::*;
+use leafwing_input_manager::{axislike::DualAxisDirection::Up, prelude::*};
 use time_wizard::TimeWizardPlugin;
-
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, CameraPlugin2D, NavigationPlugin))
         .insert_resource(ClearColor(Color::srgb(0.08, 0.08, 0.12)))
         .insert_resource(combined_mobs())
         .insert_resource(combined_heroes())
+        .init_resource::<DebugMode>()
         .init_resource::<mob::WaveConfig>()
         .init_resource::<hero::PartyConfig>()
         .add_systems(
             Startup,
             (spawn_test_sprite, hero::spawn_party, mob::spawn_mobs),
         )
+        .add_systems(Update, toggle_debug_mode)
         .run();
 }
 
