@@ -28,3 +28,14 @@ This game is built with a solid **Data-Driven Architecture** foundation on top o
   - `game_state.rs` : Manages game flow states and the `Economy` vault.
   - `time_wizard.rs` : The central time controller for wave durations and intermission intervals.
   - `game_input.rs` : Handles player keyboard and mouse inputs.
+  - `camera.rs` : Manages camera movement and zooming based on player input.
+
+
+basic attributes [x]
+basic spawn system for heroes and mobs [x]
+basic camera panning and zooming [x]
+AI pathfinding for heroes [ ]
+AI pathfinding for mobs [ ]
+basic combat system [ ]
+implement combat system for heroes [ ]
+implement combat system for mobs [ ]

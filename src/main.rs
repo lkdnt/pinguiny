@@ -2,21 +2,25 @@ mod camera;
 mod core;
 mod game_input;
 mod game_state;
+mod grid_system;
 mod hero;
 mod mob;
 mod time_wizard;
+
+use std::{f32, ptr::addr_of_mut};
 
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use camera::CameraPlugin2D;
 //use game_input::{DummyAction, Player, PlayerWalk, debug_player_walk, player_walks};
 use game_state::{Economy, GameState, WaveState};
+use grid_system::{HexNavGrid, NavigationPlugin};
 use leafwing_input_manager::prelude::*;
 use time_wizard::TimeWizardPlugin;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, CameraPlugin2D))
+        .add_plugins((DefaultPlugins, CameraPlugin2D, NavigationPlugin))
         .insert_resource(ClearColor(Color::srgb(0.08, 0.08, 0.12)))
         .insert_resource(combined_mobs())
         .insert_resource(combined_heroes())

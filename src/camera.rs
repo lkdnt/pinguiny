@@ -51,7 +51,7 @@ fn move_camera_with_keys(
 
         for zoom in zoom_reader.read() {
             if let Projection::Orthographic(proj) = &mut *projection {
-                proj.scale = (proj.scale + zoom.delta * ZOOM_SPEED).clamp(0.1, 4.0);
+                proj.scale = (proj.scale + zoom.delta * ZOOM_SPEED).clamp(0.1, 2.0);
             }
         }
     }
