@@ -15,7 +15,8 @@ use core::DebugMode;
 //use game_input::{DummyAction, Player, PlayerWalk, debug_player_walk, player_walks};
 use game_input::toggle_debug_mode;
 use game_state::{Economy, GameState, WaveState};
-use grid_system::{HexNavGrid, NavigationPlugin};
+use grid_navigation::NavigationPlugin;
+use grid_system::HexNavGrid;
 use leafwing_input_manager::{axislike::DualAxisDirection::Up, prelude::*};
 use time_wizard::TimeWizardPlugin;
 fn main() {
