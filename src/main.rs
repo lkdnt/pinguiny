@@ -2,6 +2,7 @@ mod camera;
 mod core;
 mod game_input;
 mod game_state;
+mod grid_navigation;
 mod grid_system;
 mod hero;
 mod mob;

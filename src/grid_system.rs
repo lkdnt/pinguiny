@@ -1,11 +1,33 @@
+use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
-pub struct NavigationPlugin;
+/// A priority node for the A* pathfinding algorithm
+#[derive(PartialEq)]
+pub struct PriorityNode {
+    pub priority: f32,
+    pub q: i32,
+    pub r: i32,
+}
+// Implement Eq for PriorityNode to satisfy the requirements of BinaryHeap
+impl Eq for PriorityNode {}
 
-impl Plugin for NavigationPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_hex_nav_grid)
-            .add_systems(Update, debug_draw_hex_grid);
+// Implement Ord for PriorityNode to define the ordering based on priority
+impl Ord for PriorityNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Reverse the order for min-heap behavior
+        other
+            .priority
+            .partial_cmp(&self.priority)
+            .unwrap_or(Ordering::Equal)
+    }
+}
+
+// Implement PartialOrd for PriorityNode to allow comparison of nodes
+impl PartialOrd for PriorityNode {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -141,59 +163,146 @@ impl HexNavGrid {
             ((q, r), cell)
         })
     }
-}
 
-fn setup_hex_nav_grid(mut commands: Commands) {
-    let mut grid = HexNavGrid::new(80, 70, 16.0); // radius 10, hex size 32.0
-
-    // wall_cells is a list of axial coordinates (q, r) that are not walkable
-    let wall_cells = [
-        (2, -1),
-        (2, 0),
-        (2, 1),
-        (2, 2),
-        (-3, 1),
-        (-3, 3),
-        (0, -3),
-        (1, -3),
-        (2, -3),
-    ];
-
-    for (q, r) in wall_cells {
-        grid.set_cell(q, r, false, f32::INFINITY);
-    }
-    commands.insert_resource(grid);
-}
-
-/// Debug system to visualize the hex grid in the world
-/// green for walkable, red for non-walkable
-fn debug_draw_hex_grid(grid: Res<HexNavGrid>, mut gizmos: Gizmos) {
-    // walkable first
-    for ((q, r), cell_data) in grid.iter_cells().filter(|(_, c)| c.walkable) {
-        let center = grid.hex_to_world(q, r);
-        let color = Color::srgb(0.0, 1.0, 0.0); // green
-        draw_hexagon_outline(&mut gizmos, center, grid.hex_size, color);
+    pub fn hex_distance(a_q: i32, a_r: i32, b_q: i32, b_r: i32) -> f32 {
+        (((a_q - b_q).abs() + (a_q + a_r - b_q - b_r).abs() + (a_r - b_r).abs()) / 2) as f32
     }
 
-    // blocked draw after walkable so it is on top
-    for ((q, r), cell_data) in grid.iter_cells().filter(|(_, c)| !c.walkable) {
-        let center = grid.hex_to_world(q, r);
-        let color = Color::srgb(1.0, 0.0, 0.0); // red
-        draw_hexagon_outline(&mut gizmos, center, grid.hex_size, color);
-    }
-}
+    // bi-directional so we could meet in the middle, kind of.
+    pub fn find_path_bidirectional(
+        &self,
+        start: (i32, i32),
+        target: (i32, i32),
+    ) -> Option<Vec<(i32, i32)>> {
+        if !self
+            .get_cell(start.0, start.1)
+            .map(|c| c.walkable)
+            .unwrap_or(false)
+            || !self
+                .get_cell(target.0, target.1)
+                .map(|c| c.walkable)
+                .unwrap_or(false)
+        {
+            return None;
+        }
 
-fn draw_hexagon_outline(gizmos: &mut Gizmos, center: Vec2, size: f32, color: Color) {
-    let mut points = [Vec2::ZERO; 6];
-    for i in 0..6 {
-        let angle_deg = 60.0 * i as f32 - 30.0;
-        let angle_rad = angle_deg.to_radians();
-        points[i] = center + Vec2::new(angle_rad.cos(), angle_rad.sin()) * size;
-    }
+        if start == target {
+            return Some(vec![start]);
+        }
 
-    for i in 0..6 {
-        let start = points[i];
-        let end = points[(i + 1) % 6];
-        gizmos.line_2d(start, end, color);
+        let mut frontier_start = BinaryHeap::new();
+        let mut frontier_target = BinaryHeap::new();
+
+        frontier_start.push(PriorityNode {
+            priority: 0.0,
+            q: start.0,
+            r: start.1,
+        });
+        frontier_target.push(PriorityNode {
+            priority: 0.0,
+            q: target.0,
+            r: target.1,
+        });
+
+        let mut came_from_start: HashMap<(i32, i32), (i32, i32)> = HashMap::default();
+        let mut came_from_target: HashMap<(i32, i32), (i32, i32)> = HashMap::default();
+
+        let mut cost_so_far_start: HashMap<(i32, i32), f32> = HashMap::default();
+        let mut cost_so_far_target: HashMap<(i32, i32), f32> = HashMap::default();
+
+        cost_so_far_start.insert(start, 0.0);
+        cost_so_far_target.insert(target, 0.0);
+
+        let mut meeting_point: Option<(i32, i32)> = None;
+
+        // Perform the conducting searches from both the start and target
+        while !frontier_start.is_empty() && !frontier_target.is_empty() {
+            // Expand from the start side
+            if let Some(current_node) = frontier_start.pop() {
+                let current = (current_node.q, current_node.r);
+
+                if came_from_target.contains_key(&current) {
+                    meeting_point = Some(current);
+                    break;
+                }
+
+                for next in Self::neighbors(current.0, current.1) {
+                    if let Some(cell) = self.get_cell(next.0, next.1) {
+                        if cell.walkable {
+                            let new_cost = cost_so_far_start[&current] + cell.cost;
+                            if !cost_so_far_start.contains_key(&next)
+                                || new_cost < cost_so_far_start[&next]
+                            {
+                                cost_so_far_start.insert(next, new_cost);
+                                let priority = new_cost
+                                    + Self::hex_distance(next.0, next.1, target.0, target.1);
+                                frontier_start.push(PriorityNode {
+                                    priority,
+                                    q: next.0,
+                                    r: next.1,
+                                });
+                                came_from_start.insert(next, current);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Expand from the target side
+            if let Some(current_node) = frontier_target.pop() {
+                let current = (current_node.q, current_node.r);
+
+                if came_from_start.contains_key(&current) {
+                    meeting_point = Some(current);
+                    break;
+                }
+
+                for next in Self::neighbors(current.0, current.1) {
+                    if let Some(cell) = self.get_cell(next.0, next.1) {
+                        if cell.walkable {
+                            let new_cost = cost_so_far_target[&current] + cell.cost;
+                            if !cost_so_far_target.contains_key(&next)
+                                || new_cost < cost_so_far_target[&next]
+                            {
+                                cost_so_far_target.insert(next, new_cost);
+                                let priority =
+                                    new_cost + Self::hex_distance(next.0, next.1, start.0, start.1);
+                                frontier_target.push(PriorityNode {
+                                    priority,
+                                    q: next.0,
+                                    r: next.1,
+                                });
+                                came_from_target.insert(next, current);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // If a meeting point was found, reconstruct the path
+        if let Some(meet) = meeting_point {
+            let mut path = Vec::new();
+
+            // pull path from meeting point to start point
+            let mut current = meet;
+            while current != start {
+                path.push(current);
+                current = came_from_start[&current];
+            }
+            path.push(start);
+            path.reverse();
+
+            // pull path from meeting point to target point
+            let mut current_target = meet;
+            while current_target != target {
+                current_target = came_from_target[&current_target];
+                path.push(current_target);
+            }
+
+            return Some(path);
+        }
+
+        None
     }
 }
