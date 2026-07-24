@@ -8,10 +8,9 @@ mod mob;
 mod time_wizard;
 
 use avian2d::prelude::*;
-use bevy::{prelude::*, ui_widgets::MenuAction::Toggle};
+use bevy::prelude::*;
 use camera::CameraPlugin2D;
 use core::DebugMode;
-use std::{f32, ptr::addr_of_mut};
 //use game_input::{DummyAction, Player, PlayerWalk, debug_player_walk, player_walks};
 use game_input::toggle_debug_mode;
 use game_state::{Economy, GameState, WaveState};

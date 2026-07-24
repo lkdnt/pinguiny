@@ -1,6 +1,6 @@
 use crate::core::DebugMode;
 use crate::core::{CameraPanCommand, CameraZoomCommand, PanBounds};
-use crate::game_input::{CameraAction, toggle_debug_mode, translate_camera_input};
+use crate::game_input::{CameraAction, translate_camera_input};
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 

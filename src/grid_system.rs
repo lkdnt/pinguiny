@@ -1,5 +1,3 @@
-use bevy::math::VectorSpace;
-use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 
 pub struct NavigationPlugin;
